@@ -1,0 +1,25 @@
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family='gulim')
+from sklearn.datasets import load_iris
+
+# 데이터 수집
+iris = load_iris()
+iris_data = iris.data
+iris_label = iris.target
+param_grid = {'max_depth': np.arange(3,10), 'random_state':15}
+
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+
+dt_clf = GridSearchCV(DecisionTreeClassifier(), param_grid, scoring='accuracy')
+dt_clf.fit(iris_data, iris_label)
+dt_clf.best_score_, dt_clf.best_params_
+
+label2 = dt_clf.predict([[4.4, 2.9, 1.4, 0.2]])
+iris.target_names[label2]
