@@ -1,0 +1,64 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family='gulim')
+df_basketball = pd.read_csv('datasets/basketball.csv')
+df_basketball.head()
+df_basketball.info()
+
+# 데이터 전처리
+df_data = df_basketball[['Pos', 'TRB', 'BLK', '3P', 'AST']]
+df_data.head()
+df_data = df_data.loc[df_data['Pos'].isin(['C','PG','SG'])]
+display(df_data['Pos'].value_counts())
+df_data.loc[(df_data['Pos'].isin(['PG','SG'])), 'Pos'] = 'G'
+display(df_data['Pos'].value_counts())
+
+# 결측치, 이상치 확인
+df_data.info()
+
+# 시각화
+sns.scatterplot(x='TRB', y='AST', hue='Pos', data=df_data)
+plt.show()
+sns.scatterplot(x='TRB', y='3P', hue='Pos', data=df_data)
+plt.show()
+sns.scatterplot(x='AST', y='3P', hue='Pos', data=df_data)
+plt.show()
+
+# Pos의 label encoding을 해야하나? 안해도 되나? 학습전에
+y_df = df_data[['Pos']]
+x_df = df_data[['TRB', 'AST']]
+y_df.values.ravel()
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x_df.values, y_df.values.ravel(), test_size = 0.25, random_state=15)
+
+# 최적의 K 찾기
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+
+ks = range(3, len(x_train)//2, 2)
+cv_scores = []
+
+for k in ks:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    scores = cross_val_score(knn, x_train, y_train, cv=10, scoring='accuracy')
+    cv_scores.append(scores.mean())
+cv_scores
+sns.lineplot(x=ks, y=cv_scores)
+plt.plot
+
+# 최대 성능(평균값이 제일 높은)을 내는 k값은?
+max_idx = np.argmax(cv_scores)
+k = ks[max_idx]
+k
+
+# 훈련!
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(x_train, y_train)
+y_pred = knn.predict(x_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred)
