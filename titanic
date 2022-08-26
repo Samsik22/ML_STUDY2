@@ -1,0 +1,98 @@
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family = 'gulim')
+# 데이터 로딩
+df = pd.read_csv('datasets/seaborn-data/titanic.csv')
+display(df)
+df.info()
+df.describe()
+
+# 각 항목 형 확인, 범주형?, 숫자형? 범주형이기 때문에 빈도수를 구한다.
+print(df['survived'].value_counts())
+print(df['pclass'].value_counts())
+print(df['sex'].value_counts())
+print(df['embarked'].value_counts())
+print(df['who'].value_counts())
+print(df['deck'].value_counts())
+df['family_size'] = df['sibsp'] + df['parch']
+df.head()
+df1 = df.drop(['sibsp', 'parch', 'fare', 'adult_male', 'embark_town', 'alive', 'class'], axis=1)
+df1.head()
+df1.isnull().sum()/len(df1)
+sns.heatmap(df1.isnull())
+plt.show()
+
+# deck 제거
+df1.drop(['deck'], axis=1, inplace=True)
+sns.histplot(df['age']) #도수를 파악하여 na를 어떻게 메꿀지??
+plt.show()
+df1.median(numeric_only=True)
+df1['age'] = df1['age'].fillna(df1['age'].median())
+df1.describe()
+
+# embarked
+df1['embarked'].mode()[0]
+df1['embarked'] = df1['embarked'].fillna(df1['embarked'].mode()[0])
+df1.isnull().sum()/len(df)
+def plot_row(src, ref, col_list):
+    for index, value in enumerate(col_list):
+        plt.subplot(1, len(col_list), index+1)
+        sns.countplot(x = value, hue=ref, data=src)
+        plt.title(value)
+    plt.tight_layout()
+    plt.show()
+plt.figure(figsize=(15,3))
+plot_row(df1, 'survived', ['pclass', 'sex', 'age', 'embarked'])
+
+plt.figure(figsize=(15,3))
+plot_row(df1, 'survived', ['who', 'alone', 'family_size'])
+
+# 범주형 -> 중복디는건 사실 웬만하면 함수로!
+labels, uniques = pd.factorize(df1['sex'])
+df1['sex'] = labels
+
+labels, uniques = pd.factorize(df1['embarked'])
+df1['embarked'] = labels
+
+labels, uniques = pd.factorize(df1['who'])
+df1['who'] = labels
+
+labels, uniques = pd.factorize(df1['alone'])
+df1['alone'] = labels
+
+df1.head()
+
+# 타입 변환
+df1['age'] = df1['age'].astype(int)
+df1.head()
+
+# 상관계수
+df1.corr()
+
+# 학습(Decision Tree 활용)
+y_df = df1['survived']
+x_df = df1.drop(['survived'], axis=1)
+
+display(y_df, x_df)
+# 학습
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x_df, y_df, test_size = 0.25, random_state=15)
+from sklearn.tree import DecisionTreeClassifier
+
+dt_clf = DecisionTreeClassifier(random_state=15)
+dt_clf.fit(x_train, y_train)
+# 테스트 데이터와 예측 데이터 평가
+y_pred = dt_clf.predict(x_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_pred, y_test)
+from sklearn.linear_model import LogisticRegression
+
+lr = LogisticRegression(random_state=15)
+lr.fit(x_train, y_train)
+y_pred = lr.predict(x_test)
+accuracy_score(y_pred, y_test)
