@@ -1,0 +1,59 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_iris
+
+# 데이터 수집
+iris = load_iris()
+display(iris)
+display(iris.keys())    #dict
+
+iris_data = iris.data
+iris_label = iris.target
+
+df = pd.DataFrame(data=iris_data, columns=iris.feature_names)
+display(df.head())
+
+# 데이터셋 분석
+display(df.info()) # 4col, 150data, no NAN, no object(All 숫자 data)
+
+display(df.describe())
+df['label'] = iris.target
+df['species'] = iris.target_names[iris.target]
+display(df.head())
+
+display(df['label'].value_counts()) #라벨별 개수 동일 -> 골고루 학습 -> 굉장히 happy!
+# 시각화 분석
+sns.pairplot(df[['sepal length (cm)', 'sepal width (cm)','petal length (cm)','petal width (cm)','species']], hue='species')
+plt.show()
+plt.scatter(df['petal length (cm)'], df['petal width (cm)'],marker='o', c=df['label'], edgecolor='k')
+plt.show()
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(iris_data, iris_label, test_size = 0.25, random_state=15)
+x_train, y_train
+# 학습 모델(디시전트리)
+from sklearn.tree import DecisionTreeClassifier
+
+dt_clf = DecisionTreeClassifier(random_state=15)
+dt_clf.fit(x_train, y_train)
+
+y_pred = dt_clf.predict(x_test)
+
+# 테스트 데이터와 예측 데이터 평가
+from sklearn.metrics import accuracy_score
+accuracy_score(y_pred, y_test)
+y_pred, y_test
+label = dt_clf.predict([[4.4, 2.9, 1.4, 0.2]])
+label
+iris.target_names[label]
+#문제가 없으면 이제 모델 배포
+#모델 배포
+import joblib
+joblib.dump(dt_clf,'붓꽃.pkl')
+# 패키지 로드
+dt_clf2 = joblib.load('붓꽃.pkl')
+
+label2 = dt_clf2.predict([[4.4, 2.9, 1.4, 0.2]])
+print(f'예상 붓꽃명: {iris.target_names[label2]}')
