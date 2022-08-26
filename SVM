@@ -1,0 +1,54 @@
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family='gulim')
+df_basketball = pd.read_csv('datasets/basketball.csv')
+df_basketball.head()
+df_basketball.info()
+
+# 데이터 전처리
+df_data = df_basketball[['Pos', 'TRB', 'BLK', '3P', 'AST']]
+df_data.head()
+df_data = df_data.loc[df_data['Pos'].isin(['C','PG','SG'])]
+display(df_data['Pos'].value_counts())
+df_data.loc[(df_data['Pos'].isin(['PG','SG'])), 'Pos'] = 'G'
+display(df_data['Pos'].value_counts())
+
+# 결측치, 이상치 확인
+df_data.info()
+
+# 시각화
+sns.scatterplot(x='TRB', y='AST', hue='Pos', data=df_data)
+plt.show()
+sns.scatterplot(x='TRB', y='3P', hue='Pos', data=df_data)
+plt.show()
+sns.scatterplot(x='AST', y='3P', hue='Pos', data=df_data)
+plt.show()
+
+# Pos의 label encoding을 해야하나? 안해도 되나? 학습전에
+y_df = df_data[['Pos']]
+x_df = df_data[['TRB', 'AST']]
+y_df.values.ravel()
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x_df.values, y_df.values.ravel(), test_size = 0.25, random_state=15)
+
+# 훈련
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+
+svm_params = [
+    {'kernel': ['rbf'], 'gamma':[0.00001, 0.0001, 0.001, 0.1, 1], 'C':[0.001, 0.1, 1, 10, 100, 1000]}
+]
+
+clf = GridSearchCV(SVC(), svm_params, cv=10)
+clf.fit(x_train, y_train)
+
+print(clf.best_params_)
+y_pred = clf.predict(x_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred)
