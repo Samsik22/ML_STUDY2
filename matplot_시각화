@@ -1,0 +1,28 @@
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family='gulim')
+x = np.arange(1,11,1)
+y = 0.5*x
+y1 = 0.5*x + 5
+# y2 = 0.5*x + 10 #lambda function
+
+plt.plot(x, y, 'o--b', x, y1, '+-r', x, (lambda y: 0.5*y+10)(x), 's:k', linewidth=2, markersize=7)
+plt.xlim(0,13)
+plt.title('제목')
+plt.ylabel('y축')
+plt.xlabel('x축')
+plt.grid(True)
+plt.legend(['범례1', '범례2', '범례3'], loc='upper right')
+plt.show()
+df = pd.DataFrame({'year':[n for n in range(2000,2010)],
+                    'sales':np.random.randint(2000, 10000, size=10)})
+
+df.plot(x='year', y='sales', style='g--o', title='연도별 매출액')
+plt.show()
+df[(df['year']>=2003) & (df['year']<=2007)].plot(x='year', y='sales', style='g--o', title='연도별 매출액')
+plt.grid(True)
+plt.show()
