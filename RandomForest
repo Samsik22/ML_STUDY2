@@ -1,0 +1,39 @@
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.rc('font', family='gulim')
+from sklearn.datasets import load_iris
+
+# 데이터 수집
+iris = load_iris()
+
+iris_data = iris.data
+iris_label = iris.target
+from sklearn.model_selection import train_test_split
+
+x_train, x_test, y_train, y_test = train_test_split(iris_data, iris_label, test_size = 0.25, random_state=15)
+param_grid = {'n_estimators':[100], 'max_depth':[2, 3, 4, 5, 6, 7, 8], 'min_samples_split':[2, 3, 4]}
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+dt_clf = GridSearchCV(RandomForestClassifier(), param_grid, cv=10, scoring='accuracy')
+dt_clf.fit(x_train, y_train)
+dt_clf.best_score_, dt_clf.best_params_
+y_pred = dt_clf.predict(x_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred)
+
+# XGBOOST로 같은 내용을 분류
+from xgboost import XGBClassifier
+
+xgb_clf = XGBClassifier()
+xgb_clf.fit(x_train, y_train)  #x_train은 2차원, y_train은 1차원으로!
+y_pred = xgb_clf.predict(x_test)
+
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, y_pred)
