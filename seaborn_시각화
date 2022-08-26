@@ -1,0 +1,24 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv('datasets/seaborn-data/tips.csv')
+# df = sns.load_dataset("tips")로 원랜 git hub에서 데이터 따옴
+display(df)
+
+sns.scatterplot(x="total_bill", y="tip", data=df)
+plt.show()
+sns.lmplot(x="total_bill", y="tip", data=df)
+plt.show()
+sns.lmplot(x="total_bill", y="tip", hue='smoker', data=df)
+plt.show()
+sns.lmplot(x="total_bill", y="tip", col='time', row='smoker', data=df)
+plt.show()
+df = pd.read_csv('datasets/seaborn-data/fmri.csv')
+# df = sns.load_dataset("tips")로 원랜 git hub에서 데이터 따옴
+display(df)
+
+sns.lineplot(x=df['timepoint'], y=df['signal'], linestyle='-', color='g', marker='o', alpha=0.5)
+plt.show()
+
+sns.lineplot(x="timepoint", y="signal", hue="event", style="event", markers=True, dashes=False, ci=None, data=df)
